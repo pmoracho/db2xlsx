@@ -1,0 +1,90 @@
+# ##################################################################
+# datasurces: 
+#   Fuentes de datos a dónde nos concetaremos para obtenr los datos
+#   a "escribir" en las planillas excel
+# ##################################################################
+datasources:
+    data:
+        connect_str: "DRIVER={SQL Server};SERVER=<<server>>;DATABASE=master;UID=<<user>>;PWD=<<passw>>"
+        query : "EXEC sp_who2"
+    data_test:
+        connect_str: "DRIVER={SQL Server};SERVER=<<server>>;DATABASE=master;UID=<<user>>;PWD=<<passw>>"
+        query: "SELECT '100|numero_rojo' as 'Valor' UNION SELECT '1500|numero_verde' UNION SELECT '1500|numero_amarillo'"
+
+# ##################################################################
+# files: 
+#   Archivos Excel a generar. El keyword de cada uno será el
+#   nombre final del archivo.
+# ##################################################################
+files:
+     "sp_who2 on <<server>>_<<Now>>.xlsx":
+         sheets: 
+            sp_who2:
+                default_row_height: 11.5
+                objects:
+                    text:
+                        - {text: "Resultado del sp_who ejecutado el <<Now>> en <<server>>", format: encabezado_titulo, at: B3}
+                        - {text: "Otro texto", format: encabezado_titulo, at: B1}
+                        - {text: "Otro texto", format: encabezado_titulo, at: B1}
+                        - {text: "Pisamos el data grid", format: encabezado_titulo, at: B4, order: 99}
+                    text_rows: 
+                        - {row_text: [null,null,null,null,null], format: encabezado_titulo, at: C2}
+                    datagrid: 
+                        - data:
+                            recordset_index : 1
+                            at : B3
+                            header_format: encabezado
+                            header_height: 25
+                            freeze_header: true
+                            alternate_colors: [color_impar, color_par]
+                            datacols:
+                                - [1,  "SPID", 8, int, null]
+                                - [2,  "Status", 20, default, null]
+                                - [3,  "Login", 16, default, null]
+                                - [4,  "HostName", 12, default, null]
+                                - [11, "ProgramName", 60, default, null]
+                                - [8,  "CpuTime", 12, number, cpu]
+                            autofilter_column_range: [1,6]
+                            subtotals: 
+                                - {at: "END", format: subtotal_int, total_function: 2, cols_num : [1]}
+                                - {at: "END", format: subtotal, total_function: 9, cols_num: [6]}
+
+            Prueba:
+                objects:
+                    datagrid:
+                        - data_test:
+                            recordset_index: 1
+                            at: B3
+                            header_format: encabezado
+                            header_height: 25
+                            freeze_header: true
+                            datacols:
+                                - [1, "Valor", 22, "v|f", null]
+
+# ##################################################################
+# FORMATOS 
+# ##################################################################
+formats: 
+    normal:
+        default_font:      {font_name: "Verdana", font_size: 8, num_format: "", valign: "top"}
+        right:             {align: "right"}
+        left:              {align: "left"}
+        bold:              {bold: "True"}
+        color:             {bg_color: "#c6efce"}
+        color_impar:       {bg_color: "#a6efce"}
+        color_par:         { bg_color: "#c6efce" }
+        int_fmt:           { num_format: "#,##0" }
+        number2_fmt:       { num_format: "#,##0.00" }
+        default:           [ default_font, left ]
+        encabezado_titulo: [ default_font, bold, color]
+        encabezado:        [ default_font, bold, color, {bottom: 1, bottom_color: "#0000ff", text_wrap: "true", valign: "top" }]
+        subtotal_int:      [ default_font, right, bold, int_fmt]
+        subtotal:          [ default_font, right, bold, number2_fmt]
+        number:            [ default_font, right, number2_fmt ]
+        int:               [ default_font, right, int_fmt ]
+        numero_rojo:       [ number2_fmt, bold, { bg_color: "#ff0000", font_color: "#ffffff"}]
+        numero_verde:      [ number2_fmt, bold, { bg_color: "#0ba800", font_color: "#ffffff"}]
+        numero_amarillo:   [ number2_fmt, bold, { bg_color: "#fff200", font_color: "#ffffff"}]
+
+    conditional:
+        cpu:               {type: "cell", criteria: ">", value: 1000, format: "numero_rojo"}
