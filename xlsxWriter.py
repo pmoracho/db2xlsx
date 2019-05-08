@@ -40,8 +40,12 @@ try:
     import re
     import string
     import sys
+    import os
     from ruamel.yaml import YAML
     from ruamel.yaml.compat import StringIO
+    import xlsxwriter
+    from xlsxwriter.utility import xl_cell_to_rowcol
+    from xlsxwriter.utility import xl_range
 
 except ImportError as err:
     modulename = err.args[0].partition("'")[-1].rpartition("'")[0]
@@ -102,7 +106,7 @@ class xlsxWriter:
 
         """
         valid_chars = "-_.()%s%s" % (string.ascii_letters, string.digits)
-        return ''.join(c if c in valid_chars else "-" for c in filename)
+        return ''.join(c if c in valid_chars else "-" for c in filename )
 
 
     def setup_writer_from_file(self, yaml_cfgfile):
@@ -163,7 +167,8 @@ class xlsxWriter:
 
 
     def process(self):
-
+        """Proceso principal de generación
+        """
         self._begin_batch()
         self.create_all_files()
         self._end_batch()
@@ -171,8 +176,35 @@ class xlsxWriter:
     def create_all_files(self):
         """Genera todos los archivos Xlsx.
         """
-        for file_name, file  in self.cfg["files"].items():
-            file_name = self._normalize_filename(file_name)
-            if file.get("enabled", True):
-                self.logging.info("Create file: {0}".format(file_name))
+        for filename, filedict  in self.cfg["files"].items():
+            if filedict.get("enabled", True):
+                realfilename = self.create_file(filename, filedict)
+
+
+    def create_file(self, filename, filedict):
+        """create_file: Crea el archivo xlsx
+
+        Args:
+            filename:  (str) Nombre del archivo (sin normalizar)
+            filedict:  (dict) Definición del archivo a generar
+
+        Returns:
+
+            (string) path y nombre real del archivo generado
+
+        """
+        realfilename = os.path.join(self.outputpath, self._normalize_filename(filename))
+        self.info("Generando {0}...".format(realfilename))
+
+        self.active_workbook = xlsxwriter.Workbook(realfilename, {'strings_to_numbers': True})
+
+        try:
+            self.active_workbook.close()
+
+        except IOError:
+            self._exception_handler("Imposible salvar el archivo {0}. Estara abierto o no existe la carpeta?. {1}".format(realfilename), e)
+            raise e
+
+        return realfilename
+
 
