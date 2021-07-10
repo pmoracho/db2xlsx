@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
+
 # Copyright (c) 2014 Patricio Moracho <pmoracho@gmail.com>
 #
 # db2xlsx.
@@ -17,26 +17,25 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-"""
-__author__        = "Patricio Moracho <pmoracho@gmal.com>"
-__appname__        = "autoxls"
-__appdesc__        = "Generación automatizada de archivos Excel"
-__license__        = 'GPL v3'
-__copyright__    = "2019 %s" % (__author__)
-__version__        = "0.9"
-__date__        = "2019/04/08"
 
-"""
+__author__      = "Patricio Moracho <pmoracho@gmal.com>"
+__appname__     = "db2xls"
+__appdesc__     = "Generación de informes en Excel desde bases de datos"
+__license__     = 'GPL v3'
+__copyright__   = "2020 %s" % (__author__)
+__version__     = "0.1"
+__date__        = "2020/05/12"
+
+
 ###############################################################################
 # Imports
 ###############################################################################
-"""
 try:
 
     import sys
     import gettext
     from gettext import gettext as _
-    gettext.textdomain('padrondl')
+    gettext.textdomain('db2xlsx')
 
     def my_gettext(s):
         """my_gettext: Traducir algunas cadenas de argparse."""
